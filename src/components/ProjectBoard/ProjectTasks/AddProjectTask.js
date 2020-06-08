@@ -16,25 +16,49 @@ class AddProjectTask extends Component {
       acceptanceCriteria: "",
       status: "",
       priority: 0,
-      dueData: "",
+      dueDate: "",
       projectIdentifier: id,
-      error: {}
+      errors: {}
     }
     this.onChange = this.onChange.bind(this)
+    this.onSubmit = this.onSubmit.bind(this);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.errors) {
+      this.setState({ errors: nextProps.errors })
+    }
+  }
   // on change
   onChange(e) {
     this.setState({ [e.target.name]: e.target.value})
   }
   // on submit
+  onSubmit(e) {
+    e.preventDefault();
+
+    const newTask = {
+      summary: this.state.summary,
+      acceptanceCriteria: this.state.acceptanceCriteria,
+      status: this.state.status,
+      priority: this.state.priority,
+      dueDate: this.state.dueDate
+    };
+    console.log(newTask)
+    this.props.addProjectTask(
+      this.state.projectIdentifier,
+      newTask,
+      this.props.history
+    );
+  }
 
 
     render() { 
+        const { errors } = this.state;
         const { id } = this.props.match.params;
         // console.log(this.props.match.params);
         // console.log(id)
-        console.log(this.props)
+        // console.log(this.props)
         
         return ( 
             <div className="add-PBI">
@@ -50,12 +74,19 @@ class AddProjectTask extends Component {
                 <div className="form-group">
                   <input
                      type="text"
-                    className="form-control form-control-lg"
+                    className={classnames("form-control form-control-lg", {
+                      "is-invalid":errors.summary
+                    })}
                     name="summary"
                     placeholder="Project Task summary"
                     value={this.state.summary}
                     onChange={this.onChange}
                   />
+                  {
+                    errors.summary && (
+                      <div className="invalid-feedback">{errors.summary}</div>
+                    )
+                  }
                 </div>
                 <div className="form-group">
                   <textarea
@@ -72,7 +103,7 @@ class AddProjectTask extends Component {
                     type="date"
                     className="form-control form-control-lg"
                     name="dueDate"
-                    value={this.state.dueData}
+                    value={this.state.dueDate}
                     onChange={this.onChange}
                   />
                 </div>
@@ -116,5 +147,9 @@ class AddProjectTask extends Component {
          );
     }
 }
+
+const mapStateToProps = state => ({
+  errors: state.errors
+})
  
-export default connect(null, {addProjectTask})(AddProjectTask);
+export default connect(mapStateToProps, {addProjectTask})(AddProjectTask);
